@@ -1,33 +1,46 @@
 package by.onliner;
 
-import com.sun.org.apache.bcel.internal.generic.SWITCH;
-import jdk.nashorn.internal.ir.SwitchNode;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import utils.Configuration;
+
+import java.util.concurrent.TimeUnit;
 
 public class WebDriverSettings {
-    public  FirefoxDriver driver;
-    public ChromeDriver chromeDriver;
-    public InternetExplorerDriver IEDriver;
-    String browser;
+    public WebDriver driver;
 
     @Before
     public void SetUp() {
-        System.setProperty("webdriver.gecko.driver", "src/main/resources/drivers/geckodriver.exe");
-        driver = new FirefoxDriver();
 
-        System.setProperty("webdriver.chromedriver", "src/main/resources/drivers/chromedriver.exe");
-        chromeDriver = new ChromeDriver();
+        switch (Configuration.getProperty("browser")) {
+            case "chrome":
+                //System.setProperty("webdriver.chrome.driver", "src/main/resources/drivers/chromedriver.exe");
+                WebDriverManager.chromedriver().version("80.0.3987.16").setup();
+                driver = new ChromeDriver();
+                break;
+            case "firefox":
+                WebDriverManager.firefoxdriver().setup();
+                driver = new FirefoxDriver();
+                break;
+            default:
+                System.setProperty("webdriver.ie.driver","src/main/resources/drivers/IEDriverServer.exe");
+                driver = new InternetExplorerDriver();
+                this.driver.manage().deleteAllCookies();
+        }
+
+        driver.manage().window().maximize();
+        driver.get(Configuration.getProperty("url"));
+        driver.manage().timeouts().implicitlyWait(Integer.parseInt(Configuration.getProperty("timeOutImplicitly")), TimeUnit.SECONDS);
     }
 
     @After
     public void Close(){
-       // driver.quit();
+        driver.quit();
     }
-
 }
 
